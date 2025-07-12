@@ -30,17 +30,24 @@ function MainRoomPage() {
   const [roomState, setRoomState] = useState({ slide: 0, sound: null });
   const ws = useRef<WebSocket | null>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
+  // Track previous sound to avoid replaying on unrelated state changes
+  const prevSoundRef = useRef<string | null>(null);
 
   useEffect(() => {
     ws.current = new window.WebSocket(WS_URL);
     ws.current.onmessage = (event) => {
       const msg = JSON.parse(event.data);
       if (msg.type === "state") {
-        // Play sound if sound field is set
-        if (msg.data.sound === "puzzle-solve" && audioRef.current) {
+        // Only play sound if sound is 'puzzle-solve' and it changed
+        if (
+          msg.data.sound === "puzzle-solve" &&
+          prevSoundRef.current !== "puzzle-solve" &&
+          audioRef.current
+        ) {
           audioRef.current.currentTime = 0;
           audioRef.current.play();
         }
+        prevSoundRef.current = msg.data.sound;
         setRoomState(msg.data);
       }
     };
@@ -142,6 +149,7 @@ function MainRoomPage() {
 function MobileControlPage() {
   const [roomState, setRoomState] = useState({ slide: 0, sound: null });
   const ws = useRef<WebSocket | null>(null);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
 
   useEffect(() => {
     ws.current = new window.WebSocket(WS_URL);
@@ -176,6 +184,11 @@ function MobileControlPage() {
         JSON.stringify({ type: "update", data: { sound: "puzzle-solve" } })
       );
     }
+    // Play sound locally
+    if (audioRef.current) {
+      audioRef.current.currentTime = 0;
+      audioRef.current.play();
+    }
   };
 
   return (
@@ -189,6 +202,8 @@ function MobileControlPage() {
       <button onClick={nextSlide}>Next Slide</button>
       <button onClick={playSound}>Play Sound</button>
       <Link to="/">Back to Main Room</Link>
+      {/* Audio element for puzzle-solve sound (for local playback) */}
+      <audio ref={audioRef} src={puzzleSolveSound} preload="auto" />
     </div>
   );
 }
