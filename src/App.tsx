@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from "react";
 import { BrowserRouter as Router, Routes, Route, Link } from "react-router-dom";
 import './App.css';
 import jungleEntrance from "./images/01-jungle-entrance.png";
+import puzzleSolveSound from "./sounds/puzzle-solve.mp3";
 
 const WS_URL = "ws://localhost:8080";
 
@@ -28,12 +29,18 @@ const SLIDES = [
 function MainRoomPage() {
   const [roomState, setRoomState] = useState({ slide: 0, sound: null });
   const ws = useRef<WebSocket | null>(null);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
 
   useEffect(() => {
     ws.current = new window.WebSocket(WS_URL);
     ws.current.onmessage = (event) => {
       const msg = JSON.parse(event.data);
       if (msg.type === "state") {
+        // Play sound if sound field is set
+        if (msg.data.sound === "puzzle-solve" && audioRef.current) {
+          audioRef.current.currentTime = 0;
+          audioRef.current.play();
+        }
         setRoomState(msg.data);
       }
     };
@@ -125,6 +132,8 @@ function MainRoomPage() {
           {slide.text}
         </div>
       )}
+      {/* Audio element for puzzle-solve sound */}
+      <audio ref={audioRef} src={puzzleSolveSound} preload="auto" />
     </div>
   );
 }
@@ -164,7 +173,7 @@ function MobileControlPage() {
   const playSound = () => {
     if (ws.current?.readyState === WebSocket.OPEN) {
       ws.current.send(
-        JSON.stringify({ type: "update", data: { sound: "sound1.mp3" } })
+        JSON.stringify({ type: "update", data: { sound: "puzzle-solve" } })
       );
     }
   };
