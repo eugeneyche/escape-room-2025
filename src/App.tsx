@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from "react";
 import { BrowserRouter as Router, Routes, Route, Link } from "react-router-dom";
 import './App.css';
 import jungleEntrance from "./images/01-jungle-entrance.png";
+import bloominator from "./images/02-bloominator.png";
 import puzzleSolveSound from "./sounds/puzzle-solve.mp3";
 
 const WS_URL = "ws://localhost:8080";
@@ -12,6 +13,11 @@ const SLIDES = [
     image: jungleEntrance,
     title: "The Garden",
     text: "The garden once bloomed with harmony, but something has gone wrong.\nYour journey begins here.",
+  },
+  {
+    image: bloominator,
+    title: "The Strange Machine",
+    text: "The Bloominator has powered the garden for centuries.\nBut it’s miswired and confused. Restore the circuits. Solve the system. Reboot the flow.",
   },
   {
     image: "/slide2.jpg",
